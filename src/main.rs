@@ -31,20 +31,23 @@ fn main() {
 
   let mut count = 0;
   loop {
-    blocking_notification("New Pomodoro", "");
-    println!("Starting new pomodoro");
+    let pomodoro_msg = format!("Starting new pomodoro: {}m", (POMODORO_SECONDS / 60));
+    blocking_notification(&pomodoro_msg.to_owned(), "");
+    println!("{}", pomodoro_msg);
     thread::sleep(pomodoro);
 
     println!("Pomodoro done");
     count += 1;
 
     let duration = if count % 4 == 0 {
-      println!("ready for a long pause");
-      blocking_notification("Good job, take a long pause now", "");
+      let pause_msg = format!("Ready for a long pause: {}m", (LONG_PAUSE_SECONDS / 60));
+      println!("{}", pause_msg);
+      blocking_notification(&pause_msg.to_owned(), "");
       long_pause
     } else {
-      println!("ready for a short pause");
-      blocking_notification("Short Pause", "");
+      let pause_msg = format!("Ready for a short pause: {}m", (SHORT_PAUSE_SECONDS / 60));
+      println!("{}", pause_msg);
+      blocking_notification(&pause_msg.to_owned(), "");
       short_pause
     };
     thread::sleep(duration);
