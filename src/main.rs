@@ -11,13 +11,17 @@ const SHORT_PAUSE_SECONDS: u64 = 60*5;
 const LONG_PAUSE_SECONDS: u64 = 60*20;
 
 fn blocking_notification(summary: &str, body: &str) {
-  Notification::new()
+  #[allow(unused_variables)]
+  let notification_handle = Notification::new()
     .summary(summary)
     .body(body)
-    .show().unwrap()
-    .wait_for_action(|_action| {
-      println!("Notification was closed");
-    });  
+    .show()
+    .unwrap();
+
+  #[cfg(all(unix, not(target_os = "macos")))]
+  notification_handle.wait_for_action(|_action| {
+    println!("Notification was closed");
+  });
 }
 
 fn main() {
