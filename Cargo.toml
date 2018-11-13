@@ -4,5 +4,5 @@ version = "0.1.0"
 authors = ["Moritz Ulrich <moritz@tarn-vedra.de>"]
 
 [dependencies]
-notify-rust = "3.2.1"
+notify-rust = "3.5.0"
 
