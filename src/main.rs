@@ -1,6 +1,7 @@
 extern crate notify_rust;
 
 use notify_rust::Notification;
+use notify_rust::NotificationHint as Hint;
 
 use std::time::Duration;
 use std::thread;
@@ -15,6 +16,7 @@ fn blocking_notification(summary: &str, body: &str) {
   let notification_handle = Notification::new()
     .summary(summary)
     .body(body)
+    .hint(Hint::Resident(true))
     .show()
     .unwrap();
 
