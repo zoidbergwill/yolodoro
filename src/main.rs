@@ -35,9 +35,6 @@ fn blocking_notification(summary: &str, body: &str) {
   about = "Simplest Pomodoro timer you can think of, written in Rust."
 )]
 struct Cli {
-  /// Number of lines to read
-  #[structopt(short = "n")]
-  num: u64,
   /// Length of pomodoro
   #[structopt(short = "l", default_value = "24")]
   length: u64,
