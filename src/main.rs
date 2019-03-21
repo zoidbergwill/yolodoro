@@ -13,33 +13,8 @@ use structopt::StructOpt;
 #[cfg(target_os = "macos")]
 extern crate mac_notification_sys;
 
-
 #[cfg(target_os = "macos")]
-struct MacOs;
-
-trait Platform {
-    fn setup() -> Self;
-    fn notify(msg_title: &str, msg_body: &str);
-    fn teardown(&mut self);
-}
-
-#[cfg(target_os = "macos")]
-impl Platform for MacOs {
-    fn setup() -> Self {
-        MacOs
-    }
-
-    fn notify(msg_title: &str, msg_body: &str) {
-        let bundle = mac_notification_sys::get_bundle_identifier("Script Editor").unwrap();
-        mac_notification_sys::set_application(&bundle).unwrap();
-        mac_notification_sys::send_notification(msg_title, &None, msg_body, &None).unwrap();
-    }
-
-    fn teardown(&mut self) {}
-}
-
-#[cfg(target_os = "macos")]
-type CurrPlatform = MacOs;
+use mac_notification_sys::*;
 
 /// Read some lines of a file
 #[derive(Debug, StructOpt)]
@@ -59,8 +34,18 @@ struct Cli {
     long_pause: u64,
 }
 
+#[cfg(target_os = "macos")]
+fn notify(msg: &str) {
+    send_notification("Yolodoro",
+                      &Some(msg),
+                      "Run away as fast as you can",
+                      &Some("Blow"))
+        .unwrap();
+}
+
 fn main() -> CliResult {
-    let mut p = CurrPlatform::setup();
+    let bundle = get_bundle_identifier_or_default("firefox");
+    set_application(&bundle).unwrap();
     let args = Cli::from_args();
     let pomodoro = Duration::new(args.length * 60, 0);
     let short_pause = Duration::new(args.short_pause * 60, 0);
@@ -77,7 +62,7 @@ fn main() -> CliResult {
     thread::spawn(move || loop {
         let pomodoro_msg = format!("Starting new pomodoro: {}m", (pomodoro.as_secs() / 60));
         println!("{}", pomodoro_msg);
-		CurrPlatform::notify("Yolodoro", &pomodoro_msg);
+		notify(&pomodoro_msg);
         println!("Thread is going to sleep");
         thread::sleep(pomodoro);
 
@@ -87,12 +72,12 @@ fn main() -> CliResult {
         let duration = if count % 4 == 0 {
             let pause_msg = format!("Ready for a long pause: {}m", (long_pause.as_secs() / 60));
             println!("{}", pause_msg);
-			CurrPlatform::notify("Yolodoro", &pause_msg);
+            notify(&pause_msg);
             long_pause
         } else {
             let pause_msg = format!("Ready for a short pause: {}m", (short_pause.as_secs() / 60));
             println!("{}", pause_msg);
-			CurrPlatform::notify("Yolodoro", &pause_msg);
+            notify(&pause_msg);
             short_pause
         };
         println!("Thread is going to sleep");
@@ -100,6 +85,5 @@ fn main() -> CliResult {
     });
     while running.load(Ordering::SeqCst) {}
     println!("Got it! Exiting...");
-    p.teardown();
     Ok(())
 }
